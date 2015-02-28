@@ -98,5 +98,5 @@ namespace xiloader
         ::RegCloseKey(hKey);
         return dwLanguage;
     }
-    
+
 }; // namespace xiloader
