@@ -461,6 +461,7 @@ int __cdecl main(int argc, char* argv[])
         xiloader::console::output(xiloader::color::error, "Failed to initialize critical section! Error code: %d", GetLastError());
         return 0;
     }
+    xiloader::console::output(xiloader::color::error, "DEBUG:: CriticalSection created...");
 
     /* Output the DarkStar banner.. */
     xiloader::console::output(xiloader::color::error, "==========================================================");
@@ -477,6 +478,7 @@ int __cdecl main(int argc, char* argv[])
         xiloader::console::output(xiloader::color::error, "Failed to initialize winsock, error code: %d", ret);
         return 1;
     }
+    xiloader::console::output(xiloader::color::error, "DEBUG:: winsock initialiazed...");
 
     /* Initialize COM */
     auto hResult = CoInitialize(NULL);
@@ -488,8 +490,10 @@ int __cdecl main(int argc, char* argv[])
         xiloader::console::output(xiloader::color::error, "Failed to initialize COM, error code: %d", hResult);
         return 1;
     }
+    xiloader::console::output(xiloader::color::error, "DEBUG:: CoInitialize passed...");
 
 #ifndef __GNUC__
+    xiloader::console::output(xiloader::color::error, "DEBUG:: entering attach detour for gethostbyname...");
     /* Attach detour for gethostbyname.. */
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -503,10 +507,13 @@ int __cdecl main(int argc, char* argv[])
         xiloader::console::output(xiloader::color::error, "Failed to detour function 'gethostbyname'. Cannot continue!");
         return 1;
     }
+    xiloader::console::output(xiloader::color::error, "DEBUG:: leaving attach detour for gethostbyname...");
 #else
+    xiloader::console::output(xiloader::color::error, "DEBUG:: doing hook() instead of attach detour...");
     hook();
 #endif
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: parsing arguments...");
     /* Read Command Arguments */
     for (auto x = 1; x < argc; ++x)
     {
@@ -514,6 +521,7 @@ int __cdecl main(int argc, char* argv[])
         if (!_strnicmp(argv[x], "--server", 8))
         {
             g_ServerAddress = argv[++x];
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set server address...");
             continue;
         }
 
@@ -521,6 +529,7 @@ int __cdecl main(int argc, char* argv[])
         if (!_strnicmp(argv[x], "--port", 6))
         {
             g_ServerPort = argv[++x];
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set server port...");
             continue;
         }
 
@@ -528,6 +537,7 @@ int __cdecl main(int argc, char* argv[])
         if (!_strnicmp(argv[x], "--user", 6))
         {
             g_Username = argv[++x];
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set user...");
             continue;
         }
 
@@ -535,6 +545,7 @@ int __cdecl main(int argc, char* argv[])
         if (!_strnicmp(argv[x], "--pass", 6))
         {
             g_Password = argv[++x];
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set pass...");
             continue;
         }
 
@@ -550,6 +561,7 @@ int __cdecl main(int argc, char* argv[])
             if (!_strnicmp(language.c_str(), "EU", 2) || !_strnicmp(language.c_str(), "2", 1))
                 g_Language = xiloader::Language::European;
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set lang...");
             continue;
         }
 
@@ -557,6 +569,7 @@ int __cdecl main(int argc, char* argv[])
         if (!_strnicmp(argv[x], "--hairpin", 9))
         {
             bUseHairpinFix = true;
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set hairpin...");
             continue;
         }
 
@@ -566,6 +579,7 @@ int __cdecl main(int argc, char* argv[])
                 g_DrawDistance = 20.0f;
 
             bUseDrawDistanceHack = true;
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set drawdistance...");
             continue;
         }
 
@@ -575,18 +589,21 @@ int __cdecl main(int argc, char* argv[])
                 g_MobDistance = 20.0f;
 
             bUseMobDistanceHack = true;
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set mobdistance...");
             continue;
         }
 
         if (!_strnicmp(argv[x], "--fps", 5))
         {
             bUseFPSHack = true;
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set fps...");
             continue;
         }
 
         if (!_strnicmp(argv[x], "--swear", 7))
         {
             bUseSwearHack = true;
+    xiloader::console::output(xiloader::color::error, "DEBUG:: set swear...");
             continue;
         }
 
@@ -597,12 +614,14 @@ int __cdecl main(int argc, char* argv[])
     ULONG ulAddress = 0;
     if (xiloader::network::ResolveHostname(g_ServerAddress.c_str(), &ulAddress))
     {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: entered if (xiloader::network::ResolveHostname(g_ServerAddress.c_str(), &ulAddress)) ...");
         g_ServerAddress = inet_ntoa(*((struct in_addr*)&ulAddress));
 
         /* Attempt to create socket to server..*/
         xiloader::datasocket sock;
         if (xiloader::network::CreateConnection(&sock, "54231"))
         {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: entered createconnection...");
             /* Attempt to verify the users account info.. */
             while (!xiloader::network::VerifyAccount(&sock))
                 Sleep(10);
@@ -610,32 +629,39 @@ int __cdecl main(int argc, char* argv[])
             /* Start hairpin hack thread if required.. */
             if (bUseHairpinFix)
             {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: applying hairpin fix...");
                 CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ApplyHairpinFixThread, NULL, 0, NULL);
             }
 
             if (bUseDrawDistanceHack)
             {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: applying drawdistance hack...");
                 CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ApplyDrawDistanceHack, NULL, 0, NULL);
             }
 
             if (bUseMobDistanceHack)
             {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: applying mobdistance hack...");
                 CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ApplyMobDistanceHack, NULL, 0, NULL);
             }
 
             if (bUseFPSHack)
             {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: applying fps hack...");
                 CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ApplyFPSHack, NULL, 0, NULL);
             }
 
             if (bUseSwearHack)
             {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: applying swear hack...");
                 CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ApplySwearFilterHack, NULL, 0, NULL);
             }
 
             /* Create listen servers.. */
             g_IsRunning = true;
+    xiloader::console::output(xiloader::color::error, "DEBUG:: starting FFXiServer thread...");
             HANDLE hFFXiServer = CreateThread(NULL, 0, xiloader::network::FFXiServer, &sock, 0, NULL);
+    xiloader::console::output(xiloader::color::error, "DEBUG:: starting PolServer thread...");
             HANDLE hPolServer = CreateThread(NULL, 0, xiloader::network::PolServer, NULL, 0, NULL);
 
             /* Attempt to create polcore instance..*/
@@ -646,18 +672,22 @@ int __cdecl main(int argc, char* argv[])
             }
             else
             {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: invoking setup functions for polcore...");
                 /* Invoke the setup functions for polcore.. */
                 polcore->SetAreaCode(g_Language);
                 polcore->SetParamInit(GetModuleHandle(NULL), " /game eAZcFcB -net 3");
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: obtaining common function table...");
                 /* Obtain the common function table.. */
                 void * (**lpCommandTable)(...);
                 polcore->GetCommonFunctionTable((unsigned long**)&lpCommandTable);
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: invoking inet mutex function...");
                 /* Invoke the inet mutex function.. */
                 auto findMutex = (void * (*)(...))FindINETMutex();
                 findMutex();
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: locate and prepare the pol connection...");
                 /* Locate and prepare the pol connection.. */
                 auto polConnection = (char*)FindPolConn();
                 memset(polConnection, 0x00, 0x68);
@@ -665,9 +695,11 @@ int __cdecl main(int argc, char* argv[])
                 memset(enc, 0x00, 0x1000);
                 memcpy(polConnection + 0x48, &enc, sizeof(char**));
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: locate the character storage buffer...");
                 /* Locate the character storage buffer.. */
                 g_CharacterList = (char*)FindCharacters((void **)lpCommandTable);
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: invoke the setup functions for polcore...");
                 /* Invoke the setup functions for polcore.. */
                 lpCommandTable[POLFUNC_REGISTRY_LANG](g_Language);
                 lpCommandTable[POLFUNC_FFXI_LANG](xiloader::functions::GetRegistryLanguage(g_Language));
@@ -676,8 +708,10 @@ int __cdecl main(int argc, char* argv[])
 
                 const bool bot = false;
                 if (bot) {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: do-nothing bot code here...");
                     /* Bot code here.. */
                 } else {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: attempting to create FFXi instance...");
                     /* Attempt to create FFXi instance.. */
                     IFFXiEntry* ffxi = NULL;
                     if (CoCreateInstance(xiloader::CLSID_FFXiEntry, NULL, 0x17, xiloader::IID_IFFXiEntry, (LPVOID*)&ffxi) != S_OK)
@@ -686,27 +720,39 @@ int __cdecl main(int argc, char* argv[])
                     }
                     else
                     {
+    xiloader::console::output(xiloader::color::error, "DEBUG:: attempting to start Final Fantasy...");
                         /* Attempt to start Final Fantasy.. */
                         IUnknown* message = NULL;
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: ffxi->GameStart()...");
                         ffxi->GameStart(polcore, &message);
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: ffxi->Release()...");
                         ffxi->Release();
                     }
                 }
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: Cleanup polcore object...");
                 /* Cleanup polcore object.. */
-                if (polcore != NULL)
+                if (polcore != NULL) {
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: polcore->Release()...");
                     polcore->Release();
+		}
             }
 
             /* Cleanup threads.. */
             g_IsRunning = false;
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: Terminating hFFXiServer Thread...");
             TerminateThread(hFFXiServer, 0);
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: Terminating hPolServer Thread...");
             TerminateThread(hPolServer, 0);
 
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: Waiting for hFFXiServer Object...");
             WaitForSingleObject(hFFXiServer, 1000);
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: Waiting for hPolServer Object...");
             WaitForSingleObject(hPolServer, 1000);
 
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: closeHandle hFFXiServer...");
             CloseHandle(hFFXiServer);
+		    xiloader::console::output(xiloader::color::error, "DEBUG:: closeHandle hPolServer...");
             CloseHandle(hPolServer);
         }
     }
@@ -716,6 +762,7 @@ int __cdecl main(int argc, char* argv[])
     }
 
 #ifndef __GNUC__
+    xiloader::console::output(xiloader::color::error, "DEBUG:: Detach detour...");
     /* Detach detour for gethostbyname. */
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -723,13 +770,17 @@ int __cdecl main(int argc, char* argv[])
     DetourTransactionCommit();
 #endif
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: Cleanup COM and Winsock...");
     /* Cleanup COM and Winsock */
+    xiloader::console::output(xiloader::color::error, "DEBUG:: CoUninitialize...");
     CoUninitialize();
+    xiloader::console::output(xiloader::color::error, "DEBUG:: WSACleanup...");
     WSACleanup();
 
     xiloader::console::output(xiloader::color::error, "Closing...");
     Sleep(2000);
 
+    xiloader::console::output(xiloader::color::error, "DEBUG:: DeleteCriticalSection...");
     DeleteCriticalSection(&g_CriticalSection);
 
     return ERROR_SUCCESS;
